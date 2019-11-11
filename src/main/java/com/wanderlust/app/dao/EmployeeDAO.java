@@ -1,4 +1,4 @@
-package com.wanderlust.app;
+package com.wanderlust.app.dao;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +16,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -25,6 +26,9 @@ import java.util.UUID;
 @Repository
 public class EmployeeDAO {
 
+    @Autowired
+    RestHighLevelClient client;
+
 //    public List<Employee> getEmployees() {
 //
 //        return datastore
@@ -33,14 +37,13 @@ public class EmployeeDAO {
 //                .toList();
 //    }
 
-    public IndexResponse create(Employee employee) {
+    public IndexResponse create(String employeeId, String employee) {
 
         try {
-            RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(new HttpHost("127.0.0.1", 9200, "http")));
-            ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
             IndexRequest request = new IndexRequest("employee")
-                    .id(employee.getEmployeeId().toString())
-                    .source(mapper.writeValueAsString(employee), XContentType.JSON);
+                    .id(employeeId)
+                    .source(employee, XContentType.JSON);
             return client.index(request, RequestOptions.DEFAULT);
         } catch (IOException e) {
 
@@ -48,13 +51,11 @@ public class EmployeeDAO {
         }
     }
 
-    public GetResponse get(UUID employeeId) {
+    public GetResponse get(String employeeId) {
 
         try {
-            RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(new HttpHost("127.0.0.1", 9200, "http")));
-            GetRequest getRequest = new GetRequest(
-                    "employee",
-                    employeeId.toString());
+
+            GetRequest getRequest = new GetRequest("employee", employeeId);
             return client.get(getRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
 
@@ -62,15 +63,13 @@ public class EmployeeDAO {
         }
     }
 
-    public UpdateResponse update(UUID employeeId, Employee employee) {
+    public UpdateResponse update(String employeeId, String employee) {
 
         try {
-            RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(new HttpHost("127.0.0.1", 9200, "http")));
-            UpdateRequest request = new UpdateRequest("employee", employeeId.toString());
-        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        request.doc(mapper.writeValueAsString(employee), XContentType.JSON);
-            return client.update(
-                    request, RequestOptions.DEFAULT);
+
+            UpdateRequest request = new UpdateRequest("employee", employeeId)
+                    .doc(employee, XContentType.JSON);
+            return client.update(request, RequestOptions.DEFAULT);
         } catch (IOException e) {
 
             throw new RuntimeException(e);
@@ -78,13 +77,11 @@ public class EmployeeDAO {
 
     }
 
-    public DeleteResponse delete(UUID employeeId) {
+    public DeleteResponse delete(String employeeId) {
 
         try {
-            RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(new HttpHost("127.0.0.1", 9200, "http")));
-            DeleteRequest request = new DeleteRequest(
-                "employee",
-                employeeId.toString());
+
+            DeleteRequest request = new DeleteRequest("employee", employeeId);
             return client.delete(request, RequestOptions.DEFAULT);
         } catch (IOException e) {
 

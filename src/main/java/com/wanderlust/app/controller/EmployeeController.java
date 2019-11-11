@@ -1,12 +1,12 @@
-package com.wanderlust.app;
+package com.wanderlust.app.controller;
 
-import org.elasticsearch.action.DocWriteResponse;
+import com.wanderlust.app.entity.Employee;
+import com.wanderlust.app.service.EmployeeService;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController

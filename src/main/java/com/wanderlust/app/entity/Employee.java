@@ -1,4 +1,4 @@
-package com.wanderlust.app;
+package com.wanderlust.app.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,8 +1,8 @@
-package com.wanderlust.app;
+package com.wanderlust.app.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.elasticsearch.action.DocWriteResponse;
+import com.wanderlust.app.dao.EmployeeDAO;
+import com.wanderlust.app.entity.Employee;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,8 @@ public class EmployeeService {
 
     @Autowired
     private EmployeeDAO employeeDAO;
-
+    @Autowired
+    private ObjectMapper mapper;
 
     private static final String CREATE_ERROR = "Failed to create contact";
     private static final String GET_ERROR = "Failed to get employee with Id = %s in database";
@@ -37,7 +38,8 @@ public class EmployeeService {
         employee.setCreationTime(LocalDateTime.now());
 
         try {
-            employeeDAO.create(employee);
+
+            employeeDAO.create(employee.getEmployeeId().toString(), mapper.writeValueAsString(employee));
             return employee;
         } catch (Exception e) {
             throw new RuntimeException(CREATE_ERROR, e);
@@ -48,10 +50,8 @@ public class EmployeeService {
 
         try {
 
-            GetResponse response = employeeDAO.get(employeeId);
-            ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-            Employee employee = mapper.readValue(response.getSourceAsString(), Employee.class);
-            return employee;
+            GetResponse response = employeeDAO.get(employeeId.toString());
+            return mapper.readValue(response.getSourceAsString(), Employee.class);
         } catch (Exception e) {
             throw new RuntimeException(format(GET_ERROR, employeeId.toString()), e);
         }
@@ -74,7 +74,7 @@ public class EmployeeService {
     public DeleteResponse delete(UUID employeeId) {
 
         try {
-            return employeeDAO.delete(employeeId);
+            return employeeDAO.delete(employeeId.toString());
         } catch (Exception e) {
             throw new RuntimeException(format(DELETE_ERROR, employeeId.toString()), e);
         }
